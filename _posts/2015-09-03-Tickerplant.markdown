@@ -153,14 +153,16 @@ DataFeed
 	.u.tick[src;.z.x 1];
 {% endhighlight %}
 
- * 其中第二行load了tick/sym.q,其内容如下：
+### 2.1 sym.q 
+ 在tick.q其中第二行load了tick/sym.q,其内容如下：
 {% highlight c linenos %}
 quote:([]time:`timespan$(); sym:`g#`symbol$(); bid:`float$(); ask:`float$(); bsize:`long$(); asize:`long$(); mode:`char$(); ex:`char$())
 trade:([]time:`timespan$(); sym:`g#`symbol$(); price:`float$(); size:`int$(); stop:`boolean$(); cond:`char$(); ex:`char$())
 {% endhighlight %}
 就是建立了quote和trade两个table，但是暂时不明白的事，rdb其实不在这里，为什么要建立这两张表，占位么？
 
- * 第六行load了tick/u.q, 就是utils, 包括init/del/select/publish/subscribe/add/end 这几个基本功能
+### 2.2 u.q 
+  在tick.q第六行load了tick/u.q, 就是utils, 包括init/del/select/publish/subscribe/add/end 这几个基本功能
 {% highlight c linenos %}
 \d .u
 init:{w::t!(count t::tables`.)#()}
@@ -179,10 +181,125 @@ end:{(neg union/[w[;;0]])@\:(`.u.end;x)}
 {% endhighlight %}
 注意，::就是全局变量
 
+#### .u.init
+
+ 建立了两个全局变量.u.w和.u.t, 其中.u.t是tables, .u.w是tables的行数统计
+
+#### .u.del
+
+ 在.u.w中删除关于y table的关于x的数据?
+ [.z.pc][.z.pc] 当handle close的时候，在每一个表里删去记录
+
+#### .u.sel
+
+ from x where y
+
+#### .u.pub
+
+ publish 核心函数！当.u.upd被调用时，执行了.u.pub, 在各个client端执行client下面的upd函数
+
+```
+
+ 	(neg first w)(`upd;t;x)
+
+```
+
+#### .u.add
+
+ subscribe record list
+
+#### .u.sub
+	
+ subscribe 核心函数！在x表里订阅sym是y的股票
+
+#### .u.end
+ 
+ 在各个clients远端执行`.u.end
 
 
+## tick.q
+	
+	tick.q本身在建立了quote和trade两张空表之后，增加了.u中的函数
 
+#### .u.ld
+ 
+ 关于log的
+
+#### .u.tick
+ 
+ 主函数，在最后一行.u.tick[src;.z.x 1]被调用。
+ 调用了.u.init, 检查tables是否都包含`sym`time列，`g#化每张表，
+ 定义了全局变量.u.d为当时日期，初始化日志
+
+#### .u.endofday
+  
+  执行.u.end d, 日期+1， 重置log
+
+#### .u.ts
+  
+  执行endofday的入口?
+
+#### .u.upd
+
+ 核心函数！两种模式，当在启动的命令行中指定了-t参数的时候，
+ 是执行第14-18行的部分，当没有指定-t参数的时候对应20-24行
+
+
+ 主要是20-24行的模式，补充定义了每1000ms执行一次.u.ts, 什么时候执行.u.upd? .u.upd的逻辑核心就是check then pub then log.
+
+ ```
+
+ pub[t;$[0>type first x;enlist f!x;flip f!x]]
+
+ ```
+
+ pub即.u.pub, 在client的客户端完成计算
+
+
+## 3. rdb 
+
+ r.q 即rdb, Realtime database. rdb也是一种特殊的client，link to tickerplant. 其upd函数就是insert
+
+
+	/q tick/r.q [host]:port[:usr:pwd] [host]:port[:usr:pwd]
+	/2008.09.09 .k ->.q
+
+	if[not "w"=first string .z.o;system "sleep 1"];
+
+	upd:insert;
+
+	/ get the ticker plant and history ports, defaults are 5010,5012
+	.u.x:.z.x,(count .z.x)_(":5010";":5012");
+
+	/ end of day: save, clear, hdb reload
+	.u.end:{t:tables`.;t@:where `g=attr each t@\:`sym;.Q.hdpf[`$":",.u.x 1;`:.;x;`sym];@[;`sym;`g#] each t;};
+
+	/ init schema and sync up from log file;cd to hdb(so client save can run)
+	.u.rep:{
+		(.[;();:;].)each x;
+		if[null first y;:()];
+		-11!y;
+		system "cd ",1_-10_string first reverse y};
+	/ HARDCODE \cd if other than logdir/db
+
+	/ connect to ticker plant for (schema;(logcount;log))
+	.u.rep .(hopen `$":",.u.x 0)"(.u.sub[`;`];`.u `i`L)";
+
+
+这个线程里的.u和tickerplant里面的.u不是一样的。.u.rep[应该是replay的意思][u_rep]，在最后一行中，按从右到左的结合顺序，应该是同步的执行了
+执行了.u.sub[`;`]并返回.u.i和.u.L，返回值作为.u.rep的输入参数，也就是x是.u.i, y是.u.L。
+[−11!y][-11]是streaming execute over file y, 基本就是读log文件. 这里.u.rep只会被执行一遍，也就是在初始化rdb的时候，而如果rdb在开始的时候
+log文件有内容，然后那么就会-11!y,同步一遍logfile, 也就是把logfile记录的内容读进了rdb
+
+## 4. Other clients
+
+clients的基本原理就是和rdb一样，让tickerplant把数据publish过来的时候，被调用自身的upd函数。如果这个client仅仅是某个终端的中间结果，那么给
+它分配一个独立的端口即可，让其他client连接此端口即可。
 
 
 [demo]:      http://code.kx.com/wiki/Startingkdbplus/tick
 [IPC]:       http://code.kx.com/wiki/Startingkdbplus/ip
+[.z.pc]:     http://code.kx.com/wiki/Reference/dotzdotpc
+[Dot]:		 http://code.kx.com/wiki/JB:QforMortals2/functions#Functional_Forms_of_Amend
+[-11]:       http://code.kx.com/wiki/Reference/BangSymbolInternalFunction
+[u_rep]:    http://www.firstderivatives.com/downloads/q_for_Gods_July_2014.pdf
