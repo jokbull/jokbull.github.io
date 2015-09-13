@@ -9,6 +9,7 @@ categories: kdb+
 [These][link] are very good materials for q, provided by FD. Excluding these series, [FD][FD] also have others about Kx.
 
 #### [20. Data Recovery for kdb+tick](/material/q_for_Gods_July_2014.pdf)
+
 #### [21. Building Real Time Tick Subscribers](/material/q_for_Gods_Aug_2014.pdf)
 
 
