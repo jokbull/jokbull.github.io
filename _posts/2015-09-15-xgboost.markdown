@@ -1,0 +1,86 @@
+---
+layout: post
+title:  "xgboost"
+date:   2015-09-15 20:13:08
+categories: Statistics
+---
+
+## 1. boosting algorithm
+
+Boosting方法是一种用来提高弱分类算法准确度的方法,这种方法通过构造一个预测函数系列,然后以一定的方式将他们组合成一个预测函数。他是一种**框架**,可以用来提高其他弱分类算法的识别率,也就是将其他的弱分类算法作为基分类算法放于Boosting框架中,通过Boosting框架对训练样本集的操作,得到不同的训练样本子集,用该样本子集去训练生成基分类器;每得到一个样本集就用该基分类算法在该样本集上产生一个基分类器,这样在给定训练轮数 n 后,就可产生 n 个基分类器,然后Boosting框架算法将这 n个基分类器进行加权融合,产生一个最后的结果分类器,在这 n个基分类器中,每个单个的分类器的识别率不一定很高,但他们联合后的结果有很高的识别率,这样便提高了该弱分类算法的识别率。在产生单个的基分类器时可用相同的分类算法,也可用不同的分类算法,这些算法一般是不稳定的弱分类算法,如神经网络(BP),决策树(C4.5)等。
+
+
+
+## 2. boosting algorithm history
+
+Boosting算法是一种把若干个分类器整合为一个分类器的方法，在boosting算法产生之前，还出现过两种比较重要的将多个分类器整合为一个分类器的方法，即boostrapping方法和bagging方法。我们先简要介绍一下bootstrapping方法和bagging方法。
+
+#### bootstrapping
+1. 重复地从一个样本集合D中采样n个样本
+2. 针对每次采样的子样本集，进行统计学习，获得假设Hi
+3. 将若干个假设进行组合，形成最终的假设Hfinal
+4. 将最终的假设用于具体的分类任务
+
+#### bagging
+1. 从整体样本集合中，抽样`n* < N`个样本 针对抽样的集合训练分类器Ci
+2. 分类器进行投票，最终的结果是分类器投票的优胜结果
+
+上述两种方法的都只是将分类器进行简单的组合。直到1989年，Yoav Freund与Robert Schapire提出了一种可行的将弱分类器组合为强分类器的方法。
+
+
+#### adaboost
+1995年，Freund and schapire提出了现在的adaboost算法, 其特点包括：
+1. 每次迭代改变的是样本的分布, 而不是重复采样
+2. 样本分布的改变取决于样本是否被正确分类, 正确的样本权重低，错误的样本权重高。
+3. 最终的结果是弱分类器的加权组合
+4. adaboost是一种有很高精度的分类器
+5. 可以使用各种方法构建子分类器，adaboost算法提供的是框架
+6. 当使用简单分类器时，计算出的结果是可以理解的。而且弱分类器构造极其简单
+7. 简单，不用做特征筛选(feature selection)
+8. 不用担心overfitting
+
+可以应用的场景包括：
+1. binom/multi-classification
+2. 聚类
+3. 特征选择(feature selection)
+4. 对bad case修正, 只需要增加新的弱分类器即可
+
+## 3. Gradient Boosting Machine
+
+如果说Boosting更像是一种思想，Gradient Boosting是一种Boosting的方法, 顾名思义：每一次建立模型是在之前建立模型损失函数(loss function)的梯度下降方向。
+
+
+## 4. xgboost
+
+[xgboost][xgboost]的全称是eXtreme Gradient Boosting。它是Gradient Boosting Machine的一个c++实现,  including Generalized Linear Model (GLM) and Gradient Boosted Decision Trees (GBDT)
+
+### How to Get Started
+[here](https://github.com/dmlc/xgboost/blob/master/doc/index.md)
+
+#### [Binary classification using XGBoost Command Line](https://github.com/dmlc/xgboost/blob/master/demo/binary_classification)
+This tutorial introduces the basic usage of CLI version of xgboost
+
+
+
+## 5. Others
+An interesting [list](http://blog.csdn.net/lovewinder/article/details/42009353) of machine learning tools, and an [example](http://demo.netfoucs.com/hero_fantao/article/details/42747281) about CTR prediction.
+
+[Trees, Bagging, RF and Boosting](http://jessica2.msri.org/attachments/10778/10778-boost.pdf)
+
+[Graphlab Create](https://dato.com)
+
+
+## 参考文献
+1. [Boosting算法简介](http://baidutech.blog.51cto.com/4114344/743809/)
+2. [xgboost学习手册](http://blog.sina.com.cn/s/blog_602935330102w4e4.html)
+3. [boosting与Gradient boosting](http://www.cnblogs.com/LeftNotEasy/archive/2011/01/02/machine-learning-boosting-and-gradient-boosting.html)
+4. [xgboost](https://github.com/dmlc/xgboost)
+5. [dmlc](http://dmlc.ml/)
+6. [R-xgboost](http://cos.name/2015/03/xgboost/?replytocom=6610)
+7. [Introduce Boosted Tree](http://homes.cs.washington.edu/~tqchen/pdf/BoostedTree.pdf)
+8. [Boosted Tree](http://www.52cs.org/?p=429)
+9. [xgboost parameters](http://blog.csdn.net/zc02051126/article/details/46711047)
+10. [wiki:Gradient_boosting#Gradient_tree_boosting](https://en.wikipedia.org/wiki/Gradient_boosting#Gradient_tree_boosting)
+
+[xgboost]: https://github.com/dmlc/xgboost
+
