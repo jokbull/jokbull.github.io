@@ -11,7 +11,7 @@ The javascript library [amCharts][amCharts] is an amazing chart library, consist
 
 The package installation is through github:
 
-```r
+```
 devtools::install_github("dataKnowledge/rAmCharts")
 ```
 
@@ -19,13 +19,12 @@ devtools::install_github("dataKnowledge/rAmCharts")
 There're several examples in rAmCharts github project [web][ramchartweb],
 Let's see the stock example.
 
-```r
+```
 library(rAmCharts)
 library(pipeR)
 
-# ---------------------------
 # Create the dataProvider ---
-# ---------------------------
+
 firstDate <- Sys.Date()
 chartData1 <- as.data.frame(t(sapply(0:20, FUN = function(i)
 {
@@ -59,9 +58,8 @@ chartData4 <- as.data.frame(t(sapply(0:20, FUN = function(i)
   c(date = date, value = a,  volume = b)
 })))
 
-# --------------
 # Draw chart ---
-# --------------
+
 amStockChart(theme = "light"
 ) %>>% addDataSet(dataSet(title = "first data set", categoryField = "date",
                             dataProvider = chartData1) %>>%
@@ -107,16 +105,7 @@ It also could be used in shiny, see the `shinyExample()` in that package. Guess 
 2. use `setExport()`
 3. use `rAmCharts::amChartsOutput` in GUI.
 
-```r
-#' @title Few shiny examples
-#' @description Launch a shiny app with amChart examples
-#' @examples
-#' \donttest{
-#' library(pipeR)
-#' library(shiny)
-#' shinyExamples()
-#' }
-#' @export
+```
 shinyExamples <- function()
 {
   # Check package dependencies
