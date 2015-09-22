@@ -47,6 +47,53 @@ published: True
 从设计上，account着眼的是模拟一个股票账户，记录下股票账户的状态（持仓、交易、交易成本设定、行情）。考虑到 单策略对多账户、多策略对多账户、多策略对单账户的可能，account类是一个非常必要的。
 但是可以考虑把参数、模型等先打包，然后在account里只是加入对这些类的reference即可，不必要在每个account类里实例化各个东西。
 
+目前我的设计是这样的：
+##### Strategy Class：
++ sim_params/universe_all
++ initial
++ handle_data : it's a bridge between model and trading module.
+* referencePrice/Return/PortfolioValue
+* ModelEngine : 根据quote, 产生信号。
+###### Methods:
+* hook the Trading Module 
+* single period data generator
+* run backtest
+StrategyClass 监控着交易信号，在handle_data生成了交易单后，推给Trading Module.
+
+##### Trading Module
+* blotter
+* pending_blotter
+* algo module.
+* account classes list
+###### Methods:
+* allocate the orders to accounts through algo module.
+* summarize the accounts information
+Trading Module完成多策略的轧差。
+
+
+##### Account Class
+* commission
+* slippage
+* position/cash/valid_secpos/avail_secpos
+在每个Account Class中接受quote，模拟成交. 然后把成交的回报推回Trading Module.
+
+
+在进程上，需要Trading Module单独一个进程，Server模式，每个Account是Client，从不同的Server接受order, 返回OnRtnOrder, OnRtnError等。
+
+#### Order 
+order is a list, consists of 
+* type: vwap / limited / market.  特别的，为了回测简单，vwap指在股票可以交易的前提下，以vwap价格成交。
+
+* UniqID : 什么方法？
+* Status : undealed未成交/partfilled部分成交/filled成交/canceled已撤/cancelling正在撤/error废单. 
+* filledPx : 成交价
+* orderPx  : vwap/market/ xxx.xx for limited order
+* secCode  
+
+
+
+
+
 
 
 
