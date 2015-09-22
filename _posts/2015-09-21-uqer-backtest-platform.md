@@ -17,11 +17,7 @@ published: True
 其中DATAAPI应该是通联的强项，但也是没有太多可以借鉴的地方。略过。CAL金融定价库，从期权的example来看，和QuantLib的思路是一模一样的。完美但是用不上。回测的部分可以好好研究借鉴：
 
 
-<<<<<<< HEAD
 #### [深入浅出量化实验室](/material/深入浅出量化实验室.pdf)
-=======
-#### [深入浅出量化实验室](material/深入浅出量化实验室.pdf)
->>>>>>> e19571e0934d78f6adbf12ef713d3e46bff6406f
 链接中的pdf即帮助手册。从35页到46页详细介绍了quantz的回测系统架构。
 
 ###### account class
