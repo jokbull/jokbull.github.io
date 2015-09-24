@@ -85,10 +85,14 @@ order is a list, consists of
 * type: vwap / limited / market.  特别的，为了回测简单，vwap指在股票可以交易的前提下，以vwap价格成交。
 
 * UniqID : 什么方法？
-* Status : undealed未成交/partfilled部分成交/filled成交/canceled已撤/cancelling正在撤/error废单. 
+* Status : undealed未成交/partfilled部分成交/filled成交/cancelled已撤/cancelling正在撤/error废单. 
 * filledPx : 成交价
 * orderPx  : vwap/market/ xxx.xx for limited order
 * secCode  
+
+#### TODO
+在哪里进行挂单追单的策略？应该是策略的一个部分。也就是在StrategyClass生成了交易单后，推给TradingModule, 分配给account，在每个account接受rdb推来的行情，进行撮合，然后把结果OnReturn返回给TradingModule.  TraingModule里应该有一份记录，哪个Strategy生成的order，当这个order相关的回报回来是，触发相应的Strategy中的Methods.
+
 
 
 
